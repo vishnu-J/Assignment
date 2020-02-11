@@ -52,15 +52,28 @@ class ViewController:UIViewController {
         RegisterCell()
         hideAlertView()
         videoImage.roundCorners(corners: [.topLeft,.bottomLeft], radius: 5)
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
         
         donelmg.alpha = 0
         datelbl.text = Date().toDateString()
         monthlbl.text = Date().toMonthString()
         makeRequest()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        switch sessionHelper.getSession() {
+        case .MORNING:
+            sessionCollectionView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .left, animated: true)
+        case .AFTERNOON:
+             sessionCollectionView.scrollToItem(at: IndexPath(item: 1, section: 0), at: .left, animated: true)
+        case .EVENING:
+             sessionCollectionView.scrollToItem(at: IndexPath(item: 2, section: 0), at: .left, animated: true)
+        case .NIGHT:
+             sessionCollectionView.scrollToItem(at: IndexPath(item: 3, section: 0), at: .left, animated: true)
+        default:
+             sessionCollectionView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .left, animated: true)
+        }
+        
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -274,10 +287,16 @@ extension ViewController : UICollectionViewDelegate, UICollectionViewDataSource,
     /// Helper method to update the data from model according to the session selected
     /// - Parameter session: session type
     private func updateSelectedSessionTask(session:SESSION){
+     
         if let task = self.task{
             for task in task{
                 for schedule in task.scheduleList!{
                     if schedule.session == session{
+                        if !taskList.isEmpty{
+                            context = ""
+                            taskList.removeAll()
+                        }
+                    
                         taskList.append(task)
                         if context.isEmpty{
                             context = schedule.foodContext ?? ""
